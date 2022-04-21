@@ -1,7 +1,6 @@
 package com.CS6650.CentralManagementService.controller;
 
 import com.CS6650.CentralManagementService.model.Server;
-import com.CS6650.CentralManagementService.model.UserMetadata;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

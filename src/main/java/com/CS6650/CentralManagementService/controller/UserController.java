@@ -1,6 +1,6 @@
 package com.CS6650.CentralManagementService.controller;
 
-import com.CS6650.CentralManagementService.model.UserMetadata;
+import com.CS6650.CentralManagementService.model.User;
 import com.CS6650.CentralManagementService.respository.UserRepository;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,13 +18,13 @@ public class UserController {
   }
 
   @GetMapping("/validateUser/{userName}")
-  public UserMetadata validateUser(@PathVariable String userName) {
+  public User validateUser(@PathVariable String userName) {
     // TO DO: find user with userName and return, else return null
-    return new UserMetadata();
+    return new User();
   }
 
   @PostMapping("/registerUser")
-  UserMetadata registerUser(@RequestBody UserMetadata newUser) {
+  User registerUser(@RequestBody User newUser) {
     return userRepository.save(newUser);
   }
 
