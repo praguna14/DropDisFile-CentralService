@@ -7,7 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class UserMetadata {
+public class User {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
