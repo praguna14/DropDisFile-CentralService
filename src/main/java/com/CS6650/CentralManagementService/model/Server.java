@@ -9,4 +9,8 @@ public class Server {
 
   public Server() {
   }
+
+  public int getPort() {
+    return port;
+  }
 }
