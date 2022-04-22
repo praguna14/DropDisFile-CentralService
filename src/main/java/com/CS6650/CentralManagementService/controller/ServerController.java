@@ -15,6 +15,7 @@ import java.util.Set;
 
 @RestController
 public class ServerController {
+  private static String SERVER_JAR_PATH = "/Users/prajakta/Desktop/DSjars/Server-0.0.1-SNAPSHOT.jar";
 
   @GetMapping("/servers")
   public Set<Server> getAllServers() {
@@ -25,7 +26,7 @@ public class ServerController {
   @PostMapping("/createServer/{serverPort}")
   String createServer(@PathVariable int serverPort) throws IOException {
     try{
-      Process proc = Runtime.getRuntime().exec("java -jar -Dserver.port=" +serverPort+ " /Users/prajakta/Desktop/DSjars/Server-0.0.1-SNAPSHOT.jar");
+      Process proc = Runtime.getRuntime().exec("java -jar -Dserver.port=" +serverPort+ " " + SERVER_JAR_PATH);
       InputStream in = proc.getInputStream();
       InputStream err = proc.getErrorStream();
 
