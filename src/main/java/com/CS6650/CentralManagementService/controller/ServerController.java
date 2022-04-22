@@ -1,7 +1,8 @@
 package com.CS6650.CentralManagementService.controller;
 
-import com.CS6650.CentralManagementService.model.Server;
+import com.CS6650.CentralManagementService.ServersInfo;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,23 +11,30 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.Set;
 
 @RestController
 public class ServerController {
   private static String SERVER_JAR_PATH = "/Users/prajakta/Desktop/DSjars/Server-0.0.1-SNAPSHOT.jar";
 
+  private final ServersInfo serversInfo;
+
+  @Autowired
+  public ServerController(ServersInfo serversInfo) {
+    this.serversInfo = serversInfo;
+  }
+
   @GetMapping("/servers")
-  public Set<Server> getAllServers() {
-    // TO DO: find all active servers that client will be able to access
-    return new HashSet<>();
+  public Set<Integer> getAllServers() {
+    return serversInfo.getAllActiveServerPorts();
   }
 
   @PostMapping("/createServer/{serverPort}")
   String createServer(@PathVariable int serverPort) throws IOException {
     try{
       Process proc = Runtime.getRuntime().exec("java -jar -Dserver.port=" +serverPort+ " " + SERVER_JAR_PATH);
+      serversInfo.addNewServerProcess(serverPort, proc);
+
       InputStream in = proc.getInputStream();
       InputStream err = proc.getErrorStream();
 
@@ -49,10 +57,7 @@ public class ServerController {
   }
 
   @DeleteMapping("/deleteServer/{serverPort}")
-  boolean deleteServer(@PathVariable int serverPort) {
-    //checks whether process for this server is still alive
-    //if alive, destroy
-    //else send message
-    return true;
+  String deleteServer(@PathVariable int serverPort) {
+    return serversInfo.destroyServer(serverPort);
   }
 }
