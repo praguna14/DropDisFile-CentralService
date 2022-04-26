@@ -1,5 +1,6 @@
 package com.CS6650.CentralManagementService;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -9,7 +10,7 @@ public class ServersInfo {
   private Map<Integer, Process> servers;
 
   public ServersInfo() {
-    this.servers = new HashMap<>();
+    this.servers = Collections.synchronizedMap(new HashMap<>());
   }
 
   public void addNewServerProcess(int serverPort, Process proc) {
