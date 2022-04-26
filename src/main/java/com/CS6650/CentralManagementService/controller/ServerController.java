@@ -30,10 +30,10 @@ public class ServerController {
   }
 
   @PostMapping("/createServer/{serverPort}")
-  String createServer(@PathVariable int serverPort) throws IOException {
+  public String createServer(@PathVariable int serverPort) throws IOException {
     try{
       Process proc = Runtime.getRuntime().exec("java -jar -Dserver.port=" +serverPort+ " " + SERVER_JAR_PATH);
-      serversInfo.addNewServerProcess(serverPort, proc);
+      Thread.sleep(8000); //wait for server jar to start running
 
       InputStream in = proc.getInputStream();
       InputStream err = proc.getErrorStream();
@@ -46,18 +46,19 @@ public class ServerController {
       err.read(error,0,error.length);
       String errorMsg = new String(error);
 
-      if(errorMsg.isEmpty()){ //server started successfully
+      if(errorMsg.isEmpty() && !serverJarLogs.isEmpty()){ //server started successfully
+        serversInfo.addNewServerProcess(serverPort, proc);
         return "Successfully created a new server at port " + serverPort;
       } else { //Error creating server
         return "Error creating a server at port " + serverPort + " error: " + serverJarLogs + "/n/n" + errorMsg;
       }
-    } catch (IOException e){
+    } catch (IOException | InterruptedException e){
       return "Error creating a server at port " + serverPort + " error: " + e.getMessage();
     }
   }
 
   @DeleteMapping("/deleteServer/{serverPort}")
-  String deleteServer(@PathVariable int serverPort) {
+  public String deleteServer(@PathVariable int serverPort) {
     return serversInfo.destroyServer(serverPort);
   }
 }
