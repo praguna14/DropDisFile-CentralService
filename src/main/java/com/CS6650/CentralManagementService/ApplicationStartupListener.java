@@ -7,16 +7,13 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 public class ApplicationStartupListener implements ApplicationListener<ContextRefreshedEvent> {
-  static int[] serverPortsOnStartup = {9091,9092,9093};
+  static int[] serverPortsOnStartup = {5051,5052,5053};
   long healthCheckPeriod = 1000L * 5;
   long healthCheckInitialDelay = 1000L * 15;
 
@@ -39,8 +36,7 @@ public class ApplicationStartupListener implements ApplicationListener<ContextRe
     Thread startServerThread = new Thread("Start thread for server on port " + serverPort) {
       public synchronized void run(){
         try {
-          String resultLog = serverController.createServer(serverPort);
-          ServerLogger.log(resultLog);
+          serverController.createServer(serverPort);
         } catch (IOException e) {
           ServerLogger.log(String.format("Start Server %d failed due to : %s", serverPort, e.getMessage()));
         }

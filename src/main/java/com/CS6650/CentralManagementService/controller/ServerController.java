@@ -1,6 +1,9 @@
 package com.CS6650.CentralManagementService.controller;
 
+import com.CS6650.CentralManagementService.ServerLogger;
 import com.CS6650.CentralManagementService.ServerManager;
+import com.CS6650.CentralManagementService.service.RestService;
+import com.CS6650.CentralManagementService.utility.ServerCreation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,12 +13,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Set;
 
 @RestController
 public class ServerController {
-  private static String SERVER_JAR_PATH = "/Users/prajakta/Desktop/DSjars/Server-0.0.1-SNAPSHOT.jar";
+
+  @Autowired
+  RestService restService;
 
   private ServerManager serverManager;
 
@@ -26,39 +31,29 @@ public class ServerController {
 
   @GetMapping("/servers")
   public Set<Integer> getAllServers() {
+    ServerLogger.log("Received request to get all servers");
     return serverManager.getAllActiveServerPorts();
   }
 
   @PostMapping("/createServer/{serverPort}")
   public String createServer(@PathVariable int serverPort) throws IOException {
-    try{
-      Process proc = Runtime.getRuntime().exec("java -jar -Dserver.port=" +serverPort+ " " + SERVER_JAR_PATH);
-      Thread.sleep(12000); //wait for server jar to start running
-
-      InputStream in = proc.getInputStream();
-      InputStream err = proc.getErrorStream();
-
-      byte logs[]=new byte[in.available()];
-      in.read(logs,0,logs.length);
-      String serverJarLogs = new String(logs);
-
-      byte error[]=new byte[err.available()];
-      err.read(error,0,error.length);
-      String errorMsg = new String(error);
-
-      if(errorMsg.isEmpty() && !serverJarLogs.isEmpty()){ //server started successfully
-        serverManager.addNewServerProcess(serverPort, proc);
-        return "Successfully created a new server at port " + serverPort;
-      } else { //Error creating server
-        return "Error creating a server at port " + serverPort + " error: " + serverJarLogs + "/n/n" + errorMsg;
+    ServerLogger.log("Received request to create a new server");
+    Process serverProcess = ServerCreation.createServer(serverPort);
+    if (serverProcess != null && serverProcess.isAlive()) {
+      if (restService.getHealth(serverPort).equals("OK")){
+        serverManager.addNewServerProcess(serverPort, serverProcess);
+        ServerLogger.log("Successfully created a new server at port " + serverPort);
+        return "Return: Successfully created a new server at port " + serverPort;
       }
-    } catch (IOException | InterruptedException e){
-      return "Error creating a server at port " + serverPort + " error: " + e.getMessage();
     }
+
+    ServerLogger.log("Error creating a server at port " + serverPort + ". Check CMS logs for more info");
+    return "Error creating a server at port " + serverPort + " Check CMS logs for more info";
   }
 
   @DeleteMapping("/deleteServer/{serverPort}")
   public String deleteServer(@PathVariable int serverPort) {
+    ServerLogger.log("Received request to deleter  servers at port " + serverPort);
     return serverManager.destroyServer(serverPort);
   }
 }

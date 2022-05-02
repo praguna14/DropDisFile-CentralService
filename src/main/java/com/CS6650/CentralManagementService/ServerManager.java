@@ -1,6 +1,9 @@
 package com.CS6650.CentralManagementService;
 
+import com.CS6650.CentralManagementService.service.RestService;
 import com.CS6650.CentralManagementService.utility.ServerCreation;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,6 +15,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class ServerManager {
+
+  @Autowired
+  RestService restService;
+
   private static Integer TIMEOUT_FOR_SERVER_HEALTH_SEC = 3;
 
   private Map<Integer, Process> servers;
@@ -44,13 +51,8 @@ public class ServerManager {
     for (Integer serverPort : servers.keySet()) {
       Thread trackServerFailure = new Thread("" + serverPort) {
         public synchronized void run() {
-          try {
-            Thread.sleep(new Random().nextInt(3200));
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
           //API call to server and check health
-          //restService.health(serverPort);
+          restService.getHealth(serverPort);
         }
       };
 
@@ -91,10 +93,14 @@ public class ServerManager {
       Process serverProcess = ServerCreation.createServer(newServerPort);
 
       if(serverProcess != null && serverProcess.isAlive()){
-        addNewServerProcess(newServerPort, serverProcess);
-        ServerLogger.log("Successful creation of a new server at port " + newServerPort);
+        if (restService.getHealth(newServerPort).equals("OK")){
+          addNewServerProcess(newServerPort, serverProcess);
+          ServerLogger.log("Log: Successfully created a new server at port " + newServerPort);
+        } else {
+          ServerLogger.log("Error creating a server at port " + newServerPort);
+        }
       } else {
-        ServerLogger.log("Error creating a server at port " + newServerPort + ". Check previous CMS logs for more info");
+        ServerLogger.log("Error creating a server at port " + newServerPort + ". Check logs");
       }
     }
   }
