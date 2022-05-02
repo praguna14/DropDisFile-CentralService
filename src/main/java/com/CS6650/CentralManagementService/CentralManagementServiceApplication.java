@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 public class CentralManagementServiceApplication {
 
 	public static void main(String[] args) {
-		ServerLogger.init(String.valueOf(8081), "CentralManagementServerLog");
 		SpringApplication.run(CentralManagementServiceApplication.class, args);
 	}
 

@@ -11,13 +11,8 @@ import java.util.Date;
  * file gets created first before logs are appended to it.
  */
 public class ServerLogger {
-  private static File logFile;
-  private static String currUID;
-
-  public static void init(String UID, String logFileName) {
-    currUID = UID;
-    logFile = new File(logFileName + ".txt");
-  }
+  private static File logFile = new File("CentralManagementServerLog.txt");
+  private static String currUID = "8081";
 
   public static void log(String message) {
     FileOutputStream fos = null;
