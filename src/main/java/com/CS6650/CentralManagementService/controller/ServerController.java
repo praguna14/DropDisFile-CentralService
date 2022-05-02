@@ -1,6 +1,6 @@
 package com.CS6650.CentralManagementService.controller;
 
-import com.CS6650.CentralManagementService.ServersInfo;
+import com.CS6650.CentralManagementService.ServerManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,23 +17,23 @@ import java.util.Set;
 public class ServerController {
   private static String SERVER_JAR_PATH = "/Users/prajakta/Desktop/DSjars/Server-0.0.1-SNAPSHOT.jar";
 
-  private final ServersInfo serversInfo;
+  private ServerManager serverManager;
 
   @Autowired
-  public ServerController(ServersInfo serversInfo) {
-    this.serversInfo = serversInfo;
+  public ServerController(ServerManager serverManager) {
+    this.serverManager = serverManager;
   }
 
   @GetMapping("/servers")
   public Set<Integer> getAllServers() {
-    return serversInfo.getAllActiveServerPorts();
+    return serverManager.getAllActiveServerPorts();
   }
 
   @PostMapping("/createServer/{serverPort}")
   public String createServer(@PathVariable int serverPort) throws IOException {
     try{
       Process proc = Runtime.getRuntime().exec("java -jar -Dserver.port=" +serverPort+ " " + SERVER_JAR_PATH);
-      Thread.sleep(8000); //wait for server jar to start running
+      Thread.sleep(12000); //wait for server jar to start running
 
       InputStream in = proc.getInputStream();
       InputStream err = proc.getErrorStream();
@@ -47,7 +47,7 @@ public class ServerController {
       String errorMsg = new String(error);
 
       if(errorMsg.isEmpty() && !serverJarLogs.isEmpty()){ //server started successfully
-        serversInfo.addNewServerProcess(serverPort, proc);
+        serverManager.addNewServerProcess(serverPort, proc);
         return "Successfully created a new server at port " + serverPort;
       } else { //Error creating server
         return "Error creating a server at port " + serverPort + " error: " + serverJarLogs + "/n/n" + errorMsg;
@@ -59,6 +59,6 @@ public class ServerController {
 
   @DeleteMapping("/deleteServer/{serverPort}")
   public String deleteServer(@PathVariable int serverPort) {
-    return serversInfo.destroyServer(serverPort);
+    return serverManager.destroyServer(serverPort);
   }
 }
