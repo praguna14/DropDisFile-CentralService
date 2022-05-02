@@ -1,5 +1,7 @@
 package com.CS6650.CentralManagementService;
 
+import com.CS6650.CentralManagementService.utility.ServerCreation;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +45,7 @@ public class ServerManager {
       Thread trackServerFailure = new Thread("" + serverPort) {
         public synchronized void run() {
           try {
-            Thread.sleep(new Random().nextInt(4000));
+            Thread.sleep(new Random().nextInt(3200));
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
@@ -79,7 +81,21 @@ public class ServerManager {
   }
 
   private void handleFailedServers(int port){
-      // add logic to destroy failed server and add a new replacement server
-    ServerLogger.log("No response received from server at port " + port + ", server failed. ");
+    ServerLogger.log("No health check response received from server at port " + port + ", destroying process for server. ");
+    String result = destroyServer(port);
+
+    if(result.startsWith("Successfully")){
+      int newServerPort = 10000 + new Random().nextInt(10000);
+      ServerLogger.log("Creating a new server at port " + newServerPort + " as a replacement for destroyed server " + port);
+
+      Process serverProcess = ServerCreation.createServer(newServerPort);
+
+      if(serverProcess != null && serverProcess.isAlive()){
+        addNewServerProcess(newServerPort, serverProcess);
+        ServerLogger.log("Successful creation of a new server at port " + newServerPort);
+      } else {
+        ServerLogger.log("Error creating a server at port " + newServerPort + ". Check previous CMS logs for more info");
+      }
+    }
   }
 }
